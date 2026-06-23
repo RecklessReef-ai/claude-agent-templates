@@ -25,6 +25,16 @@ This skill gathers automatically via a daily cron, but **teaching is always inte
 
 Keep diagrams focused — show the core concept, not every edge case. Add brief labels on arrows/nodes so the diagram is self-explanatory.
 
+**Always save diagrams (dated archive)**: Whenever you generate one or more Mermaid diagrams for [YOUR_NAME] in a session, *also* write them to a self-contained HTML file so he can open them in a browser — never just leave them inline-only. Behavior:
+1. Write a new file `~/.claude/ai-tutor/diagrams/diagrams-YYYY-MM-DD.html` (today's date). If a file for today already exists, append the new diagram(s) to it rather than overwriting.
+2. The HTML must be self-contained and render every diagram via Mermaid loaded from CDN — use this loader at the end of `<body>`:
+   `<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs'; mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });</script>`
+   Put each diagram's source inside a `<div class="mermaid">…</div>`. Give each a heading and a one-line caption matching what you explained inline.
+3. Prepend a new `<li>` entry (newest first) to `~/.claude/ai-tutor/diagrams/index.html` linking the dated file, with a short list of the topics it covers. Create `index.html` if missing.
+4. Tell [YOUR_NAME] the saved path and offer to open it (`xdg-open <file>`).
+
+The inline Mermaid in chat and the saved HTML should always match. Mermaid label gotchas to avoid render breaks: don't put raw `✗`/`✓` glyphs inside node IDs' first token — wrap any node text with special characters in quotes, and prefer HTML entities (`#10007;`, `#10003;`) or trailing emoji over leading glyphs.
+
 ---
 
 ## 2. Topic Focus
@@ -168,6 +178,7 @@ Read-only. Print the recent `session-log.md` history and a quick mastery summary
 - `~/.claude/ai-tutor/knowledge-base.md` — all concept cards (the learning content).
 - `~/.claude/ai-tutor/progress.json` — per-card mastery state.
 - `~/.claude/ai-tutor/session-log.md` — history of gather + teaching sessions.
+- `~/.claude/ai-tutor/diagrams/` — saved Mermaid diagrams as dated, self-contained HTML files, with `index.html` linking them newest-first.
 
 **Gathering is on-demand (local).** There is no cloud cron — `/schedule` runs agents in Anthropic's cloud, which can't write to this local knowledge base. Gather by running `/ai-tutor gather` yourself, or run `/loop 1d /ai-tutor gather` to repeat it daily while the machine is on. The `auto` argument still suppresses approval prompts when used inside a loop.
 
